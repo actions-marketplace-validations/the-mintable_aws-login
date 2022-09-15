@@ -18,6 +18,9 @@ jobs:
         with:
           aws-account: 123
           aws-region: xyx
+          codeartifact:
+          docker: false
+          login: false
 
       - name: Env
         run: env|sort

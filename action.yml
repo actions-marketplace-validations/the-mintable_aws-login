@@ -25,6 +25,10 @@ inputs:
     required: false
     default: true
 
+  login:
+    required: false
+    default: true
+
 # ======================================================================================================================
 runs:
   using: 'composite'
@@ -39,6 +43,7 @@ runs:
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
+      if: ${{ inputs.login }}
       with:
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: arn:aws:iam::${{ inputs.aws-account }}:role/${{ env.AWS_ROLE }}
