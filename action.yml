@@ -1,4 +1,4 @@
-name: 'aws-login'
+name: 'the-mintable/aws-login'
 description: 'GitHub Action to login to AWS'
 author: '@the-mintable'
 
