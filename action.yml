@@ -1,0 +1,84 @@
+name: 'aws-login'
+description: 'GitHub Action to login to AWS'
+author: '@the-mintable'
+
+branding:
+  icon: 'box'
+  color: 'blue'
+
+# ======================================================================================================================
+inputs:
+
+  aws_account:
+    required: false
+    default: '${{ env.AWS_ACCOUNT }}'
+
+  aws_region:
+    required: false
+    default: '${{ env.AWS_REGION }}'
+
+  codeartifact:
+    description: 'The CodeArtifact domain name, if required.'
+    required: false
+    default: ''
+
+  docker:
+    description: 'Whether or not Docker will be used.'
+    required: false
+    default: true
+
+# ======================================================================================================================
+runs:
+  using: 'composite'
+
+  permissions:
+    id-token: write
+    contents: read
+
+  steps:
+
+    - name: Prepare environment variables
+      run: |
+        if [ -z "${{inputs.aws_account}}" ]; then
+          echo "::error::aws_account not set"
+          exit 1
+        fi
+        if [ -z "${{inputs.aws_region}}" ]; then
+          echo "::error::aws_region not set"
+          exit 1
+        fi
+        echo "name=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: ${{ inputs.aws_region }}
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/github-${{ env.name }}
+
+    - name: Login to Amazon CodeArtifact
+      if: ${{ inputs.codeartifact != '' }}
+      run: |
+        cmd="aws codeartifact get-authorization-token"
+        tmp="$($cmd --domain ${{ inputs.codeartifact }} --domain-owner ${{ inputs.aws_account }} --region ${{ inputs.aws_region }} --query authorizationToken --output text)"
+        if [ -z "$tmp" ]; then
+          echo "::error::$cmd failed."
+          exit 1
+        else
+          echo "::add-mask::$tmp"
+          echo "CODEARTIFACT_AUTH_TOKEN=$tmp" >> $GITHUB_ENV
+          tmp=
+        fi
+
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v1
+      if: ${{ inputs.docker }}
+
+    - name: Cache docker layers
+      uses: satackey/action-docker-layer-caching@v0.0.11
+      if: ${{ inputs.docker }}
+      continue-on-error: true
+      with:
+        key: docker-layer-cache-{hash}
+        restore-keys: |
+          docker-layer-cache-
+          layer-docker-layer-cache-
