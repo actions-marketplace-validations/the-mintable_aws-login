@@ -10,12 +10,10 @@ branding:
 inputs:
 
   aws_account:
-    required: false
-    default: '${{ env.AWS_ACCOUNT }}'
+    required: true
 
   aws_region:
-    required: false
-    default: '${{ env.AWS_REGION }}'
+    required: true
 
   codeartifact:
     description: 'The CodeArtifact domain name, if required.'
@@ -34,15 +32,8 @@ runs:
   steps:
 
     - name: Prepare environment variables
+      shell: bash
       run: |
-        if [ -z "${{inputs.aws_account}}" ]; then
-          echo "::error::aws_account not set"
-          exit 1
-        fi
-        if [ -z "${{inputs.aws_region}}" ]; then
-          echo "::error::aws_region not set"
-          exit 1
-        fi
         echo "AWS_ROLE=github-${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
         echo "DOCKER_DOMAIN=${{inputs.aws_account}}.dkr.ecr.${{inputs.aws_region}}.amazonaws.com" >> $GITHUB_ENV
 
@@ -54,6 +45,7 @@ runs:
 
     - name: Login to Amazon CodeArtifact
       if: ${{ inputs.codeartifact != '' }}
+      shell: bash
       run: |
         cmd="aws codeartifact get-authorization-token"
         tmp="$($cmd --domain ${{ inputs.codeartifact }} --domain-owner ${{ inputs.aws_account }} --region ${{ inputs.aws_region }} --query authorizationToken --output text)"
