@@ -4,10 +4,6 @@ on:
   pull_request:
   push:
 
-env:
-  AWS_ACCOUNT: x
-  AWS_REGION: x
-
 jobs:
   ci:
     name: CI
@@ -19,3 +15,9 @@ jobs:
 
       - name: Install
         uses: ./
+        with:
+          aws-account: 123
+          aws-region: xyx
+
+      - name: Env
+        run: env|sort
