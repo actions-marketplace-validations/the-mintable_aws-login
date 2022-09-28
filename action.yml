@@ -23,10 +23,12 @@ inputs:
   docker:
     description: 'Whether or not Docker will be used.'
     required: false
+    type: boolean
     default: true
 
   login:
     required: false
+    type: boolean
     default: true
 
 # ======================================================================================================================
