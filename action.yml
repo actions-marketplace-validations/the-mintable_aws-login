@@ -43,7 +43,7 @@ runs:
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
-      if: ${{ inputs.login }}
+      if: ${{ inputs.login != 'false' }}
       with:
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: arn:aws:iam::${{ inputs.aws-account }}:role/${{ env.AWS_ROLE }}
@@ -65,11 +65,11 @@ runs:
 
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
-      if: ${{ inputs.docker }}
+      if: ${{ inputs.docker != 'false' }}
 
     - name: Cache docker layers
       uses: satackey/action-docker-layer-caching@v0.0.11
-      if: ${{ inputs.docker }}
+      if: ${{ inputs.docker != 'false' }}
       continue-on-error: true
       with:
         key: docker-layer-cache-{hash}
