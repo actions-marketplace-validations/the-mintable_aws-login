@@ -42,7 +42,7 @@ runs:
         echo "DOCKER_DOMAIN=${{inputs.aws-account}}.dkr.ecr.${{inputs.aws-region}}.amazonaws.com" >> $GITHUB_ENV
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2
       if: ${{ inputs.login != 'false' }}
       with:
         aws-region: ${{ inputs.aws-region }}
